@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic-Tac-Toe Against AI</title>
+    <style>
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 300px;
+            height: 300px;
+        }
+        
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            cursor: pointer;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="board"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const board = document.querySelector(".board");
+            const cells = [];
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6] // Diagonals
+            ];
+            let currentPlayer = "X";
+            let gameEnded = false;
+
+            // Create game board
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cells.push(cell);
+                board.appendChild(cell);
+
+                cell.addEventListener("click", function () {
+                    if (cell.innerHTML === "" && !gameEnded) {
+                        cell.innerHTML = currentPlayer;
+                        cell.style.pointerEvents = "none";
+
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        } else if (checkDraw()) {
+                            announceDraw();
+                            gameEnded = true;
+                        } else {
+                            currentPlayer = currentPlayer === "X" ? "O" : "X";
+                            if (!gameEnded) {
+                                setTimeout(makeAIMove, 500);
+                            }
+                        }
+                    }
+                });
+            }
+
+            function checkWin(player) {
+                for (let combination of winningCombinations) {
+                    const [a, b, c] = combination;
+                    if (
+                        cells[a].innerHTML === player &&
+                        cells[b].innerHTML === player &&
+                        cells[c].innerHTML === player
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function checkDraw() {
+                return cells.every(cell => cell.innerHTML !== "");
+            }
+
+            function announceWinner(player) {
+                alert("Player " + player + " wins!");
+            }
+
+            function announceDraw() {
+                alert("It's a draw!");
+            }
+
+            function makeAIMove() {
+                // Check for winning move
+                for (let combination of winningCombinations) {
+                    const [a, b, c] = combination;
+                    if (
+                        cells[a].innerHTML === currentPlayer &&
+                        cells[b].innerHTML === currentPlayer &&
+                        cells[c].innerHTML === ""
+                    ) {
+                        cells[c].innerHTML = currentPlayer;
+                        cells[c].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    } else if (
+                        cells[a].innerHTML === currentPlayer &&
+                        cells[c].innerHTML === currentPlayer &&
+                        cells[b].innerHTML === ""
+                    ) {
+                        cells[b].innerHTML = currentPlayer;
+                        cells[b].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    } else if (
+                        cells[b].innerHTML === currentPlayer &&
+                        cells[c].innerHTML === currentPlayer &&
+                        cells[a].innerHTML === ""
+                    ) {
+                        cells[a].innerHTML = currentPlayer;
+                        cells[a].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    }
+                }
+
+                // Check for blocking move
+                for (let combination of winningCombinations) {
+                    const [a, b, c] = combination;
+                    if (
+                        cells[a].innerHTML !== "" &&
+                        cells[a].innerHTML !== currentPlayer &&
+                        cells[b].innerHTML !== "" &&
+                        cells[b].innerHTML !== currentPlayer &&
+                        cells[c].innerHTML === ""
+                    ) {
+                        cells[c].innerHTML = currentPlayer;
+                        cells[c].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    } else if (
+                        cells[a].innerHTML !== "" &&
+                        cells[a].innerHTML !== currentPlayer &&
+                        cells[c].innerHTML !== "" &&
+                        cells[c].innerHTML !== currentPlayer &&
+                        cells[b].innerHTML === ""
+                    ) {
+                        cells[b].innerHTML = currentPlayer;
+                        cells[b].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    } else if (
+                        cells[b].innerHTML !== "" &&
+                        cells[b].innerHTML !== currentPlayer &&
+                        cells[c].innerHTML !== "" &&
+                        cells[c].innerHTML !== currentPlayer &&
+                        cells[a].innerHTML === ""
+                    ) {
+                        cells[a].innerHTML = currentPlayer;
+                        cells[a].style.pointerEvents = "none";
+                        if (checkWin(currentPlayer)) {
+                            announceWinner(currentPlayer);
+                            gameEnded = true;
+                        }
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        return;
+                    }
+                }
+
+                // Make a random move
+                const emptyCells = cells.filter(cell => cell.innerHTML === "");
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const randomCell = emptyCells[randomIndex];
+                randomCell.innerHTML = currentPlayer;
+                randomCell.style.pointerEvents = "none";
+
+                if (checkWin(currentPlayer)) {
+                    announceWinner(currentPlayer);
+                    gameEnded = true;
+                }
+
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+            }
+        });
+    </script>
+</body>
+</html>
